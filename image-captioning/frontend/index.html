@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI-powered image captioning using BLIP Vision Transformer + Transformer decoder. Upload any image and get an intelligent caption instantly." />
+  <title>VisionScript — AI Image Captioning</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Animated background ── -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="12" fill="url(#grad-logo)"/>
+          <path d="M10 28L16 18L21 24L25 20L30 28H10Z" fill="white" opacity="0.9"/>
+          <circle cx="26" cy="14" r="3" fill="white" opacity="0.9"/>
+          <defs>
+            <linearGradient id="grad-logo" x1="0" y1="0" x2="40" y2="40">
+              <stop offset="0%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#2563eb"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">VisionScript</span>
+        <span class="logo-badge">AI</span>
+      </div>
+      <nav class="header-nav">
+        <a href="#" class="nav-link" id="nav-model-info">Model Info</a>
+        <a href="https://arxiv.org/abs/2201.12086" target="_blank" class="nav-link">Paper ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Hero Section ── -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Computer Vision + NLP Fusion
+      </div>
+      <h1 class="hero-title">
+        See the World Through<br/>
+        <span class="gradient-text">AI's Eyes</span>
+      </h1>
+      <p class="hero-subtitle">
+        Upload any image and watch our BLIP model — powered by a Vision Transformer
+        encoder and Transformer decoder — craft an intelligent, natural-language caption
+        in seconds.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Main App ── -->
+  <main class="app-container">
+
+    <!-- Upload Card -->
+    <div class="card upload-card" id="upload-card">
+      <div class="card-header">
+        <h2 class="card-title">Upload Image</h2>
+        <p class="card-subtitle">JPG, PNG, WebP, GIF, BMP — up to 20 MB</p>
+      </div>
+
+      <!-- Drop Zone -->
+      <div class="drop-zone" id="drop-zone" tabindex="0" role="button"
+           aria-label="Click or drag and drop an image to upload">
+        <div class="drop-zone-inner" id="dz-placeholder">
+          <div class="dz-icon-wrap">
+            <svg class="dz-icon" viewBox="0 0 64 64" fill="none">
+              <path d="M32 44V20M32 20L22 30M32 20L42 30" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 48C8 48 6 45 6 41C6 37.5 8.5 34.5 12 34C12 27 17 22 24 22C25.5 22 27 22.5 28 23" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M52 48C56 48 58 45 58 41C58 37.5 55.5 34.5 52 34C52 27 47 22 40 22C38.5 22 37 22.5 36 23" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="dz-primary-text">Drop your image here</p>
+          <p class="dz-secondary-text">or <span class="dz-click-text">browse files</span></p>
+        </div>
+
+        <!-- Preview (hidden initially) -->
+        <div class="dz-preview" id="dz-preview" hidden>
+          <img class="preview-img" id="preview-img" src="" alt="Uploaded image preview" />
+          <button class="preview-remove" id="remove-btn" aria-label="Remove image">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <input type="file" id="file-input" class="file-input" accept="image/*" aria-hidden="true" />
+      </div>
+
+      <!-- Optional Prompt -->
+      <div class="prompt-section">
+        <label class="prompt-label" for="prompt-input">
+          Optional context prompt
+          <span class="prompt-hint">Guide the caption generation (e.g. "a photo of")</span>
+        </label>
+        <input type="text" id="prompt-input" class="prompt-input"
+               placeholder='e.g. "a photo of a dog playing in"'
+               maxlength="100" />
+      </div>
+
+      <!-- Generate Button -->
+      <button class="btn-generate" id="generate-btn" disabled>
+        <span class="btn-text">Generate Caption</span>
+        <span class="btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- Result Card -->
+    <div class="card result-card" id="result-card" hidden>
+      <div class="result-header">
+        <div class="result-status-wrap">
+          <div class="result-status-dot"></div>
+          <span class="result-status-text">Caption Generated</span>
+        </div>
+        <button class="btn-copy" id="copy-btn" aria-label="Copy caption">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+          </svg>
+          Copy
+        </button>
+      </div>
+
+      <!-- Caption output -->
+      <div class="caption-display">
+        <p class="caption-text" id="caption-text"></p>
+        <div class="caption-cursor" id="caption-cursor"></div>
+      </div>
+
+      <!-- Model info pills -->
+      <div class="model-meta" id="model-meta">
+        <div class="meta-pill" id="meta-encoder">
+          <span class="meta-label">Encoder</span>
+          <span class="meta-value" id="meta-encoder-val">—</span>
+        </div>
+        <div class="meta-pill" id="meta-decoder">
+          <span class="meta-label">Decoder</span>
+          <span class="meta-value" id="meta-decoder-val">—</span>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-label">Device</span>
+          <span class="meta-value" id="meta-device-val">—</span>
+        </div>
+      </div>
+
+      <!-- Try another -->
+      <button class="btn-try-another" id="try-another-btn">
+        ← Try Another Image
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-overlay" id="loading-overlay" hidden aria-live="polite" aria-busy="true">
+      <div class="loading-card">
+        <div class="spinner-wrap">
+          <div class="spinner-ring spinner-ring-outer"></div>
+          <div class="spinner-ring spinner-ring-mid"></div>
+          <div class="spinner-ring spinner-ring-inner"></div>
+          <div class="spinner-brain">🧠</div>
+        </div>
+        <p class="loading-title" id="loading-title">Analyzing Image...</p>
+        <p class="loading-sub" id="loading-sub">Extracting visual features with ViT encoder</p>
+        <div class="loading-steps">
+          <div class="step" id="step-1">
+            <div class="step-dot active"></div>
+            <span>Feature Extraction (ViT)</span>
+          </div>
+          <div class="step" id="step-2">
+            <div class="step-dot"></div>
+            <span>Language Decoding</span>
+          </div>
+          <div class="step" id="step-3">
+            <div class="step-dot"></div>
+            <span>Caption Refinement</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div class="toast" id="error-toast" role="alert" aria-live="assertive">
+      <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01" stroke-linecap="round"/>
+      </svg>
+      <span class="toast-msg" id="toast-msg">An error occurred.</span>
+    </div>
+
+  </main>
+
+  <!-- ── How it works ── -->
+  <section class="how-it-works">
+    <h2 class="section-title">How It Works</h2>
+    <div class="pipeline-grid">
+      <div class="pipeline-step">
+        <div class="pipeline-icon">🖼️</div>
+        <div class="pipeline-connector"></div>
+        <h3 class="pipeline-step-title">Image Input</h3>
+        <p class="pipeline-step-desc">Your image is resized to 384×384 pixels and normalized</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-icon">🔍</div>
+        <div class="pipeline-connector"></div>
+        <h3 class="pipeline-step-title">ViT Encoder</h3>
+        <p class="pipeline-step-desc">Vision Transformer splits image into 16×16 patches and encodes rich visual embeddings</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-icon">🔗</div>
+        <div class="pipeline-connector"></div>
+        <h3 class="pipeline-step-title">Cross-Attention</h3>
+        <p class="pipeline-step-desc">BLIP cross-attention fuses visual features with language context</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-icon">✍️</div>
+        <div class="pipeline-connector" style="opacity:0"></div>
+        <h3 class="pipeline-step-title">Caption Generation</h3>
+        <p class="pipeline-step-desc">Transformer decoder generates tokens using beam search (5 beams)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Model Info Modal ── -->
+  <div class="modal-backdrop" id="modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal-close" id="modal-close" aria-label="Close modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h2 class="modal-title" id="modal-title">Model Architecture</h2>
+      <div class="modal-content" id="modal-content">
+        <p class="modal-loading">Loading model info...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <p>Built with BLIP · HuggingFace Transformers · Flask · Vanilla JS</p>
+    <p class="footer-sub">Computer Vision + Natural Language Processing</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
